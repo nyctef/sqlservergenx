@@ -25,6 +25,7 @@ type Statement =
     | CreateConstraint of Constraint
 
 type DatabaseModel = {statements: List<Statement>}
+let addStatement model statement = {model with statements=statement::model.statements}
 
 let createTableSql props colummns =
     "1234"
@@ -36,7 +37,22 @@ let getSql x =
             | CreateConstraint x -> "hello")
             x.statements
 
+// given a seed and a database model, produce a more complicated database model
+type Complicator = int -> DatabaseModel -> DatabaseModel
+
+let addTable:Complicator = fun seed model ->
+    let tp = {name="table"; ttype=PlainTable}
+    let statement = CreateTable(tp, [{name="col1"; ctype=NVarChar(Length(5))}])
+    addStatement model statement
+    
+
 [<EntryPoint>]
 let main argv = 
     printfn "%A" argv
+    let dbModel = {statements=[]}
+    let dbModel = addTable 1 dbModel
+    let sql = getSql dbModel
+    printfn "%A" sql
+    //let dbModel = DatabaseModel{statements:
+    //    CreateTable(TableProperties{name:"hllo
     0 // return an integer exit code
