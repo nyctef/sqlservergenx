@@ -74,7 +74,25 @@ type RandomGenerator = unit -> int
 // given a seed and a database model, produce a more complicated database model
 type Complicator = RandomGenerator -> DatabaseModel -> DatabaseModel
 
+let findOrCreateTable rand model updateTable =
+    // TODO: we want to be able to
+    // - find all tables we could add a column to
+    // - add a new table if we aren't satisfied with the available options
+    // - pick a table at random
+    // - call updateTable on that table
+    // - return the whole model with the updated table
+
+    // we can probably try writing the massively inefficient version of the above
+    // and look into swapping out the datatypes to make it more efficient in the future?
+    model
+
 let addTable:Complicator = fun rand model ->
     let tp = {name="table"; ttype=PlainTable; columns = [{name="col1"; ctype=NVarChar(Length(5))}]}
     let statement = CreateTable(tp)
     addStatement model statement
+
+let addColumn:Complicator = fun rand model ->
+    let updateTable table =
+        let newColumn = {name="col2"; ctype=NVarChar(Length(5))}
+        {table with columns = newColumn::table.columns}
+    findOrCreateTable rand model updateTable
