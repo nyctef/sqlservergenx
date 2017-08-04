@@ -10,7 +10,6 @@ type ColumnType =
 type ColumnName = string
 
 type ObjectName = string
-let objectNameSql x = x
 
 type Column = {name:ColumnName; ctype:ColumnType}
 
@@ -35,13 +34,27 @@ let addStatement model statement = {model with statements=statement::model.state
 
 ///////////////////////// sql generation
 
-let columnSql column =
-    "1234"
+let columnNameSql x = x
+let objectNameSql x = x
+
+let lengthSql l =
+    match l with
+    | Max -> "MAX"
+    | Length x -> string x
+
+let columnTypeSql (coltype:ColumnType) =
+    match coltype with
+    | Bit -> "bit"
+    | Int -> "int"
+    | NVarChar length -> "nvarchar(" + lengthSql length + ")"
+
+let columnSql (column:Column) :string =
+    columnNameSql column.name + " " + columnTypeSql column.ctype
 
 let createTableSql table =
     "CREATE TABLE " + objectNameSql table.name + "\n" +
     "(\n" +
-    (List.map columnSql table.columns |> String.concat ",\n") +
+    (List.map columnSql table.columns |> String.concat ",\n") + "\n" +
     ")\n"
 
 let getSql x = 
