@@ -5,7 +5,8 @@ let main argv =
     printfn "%A" argv
 
     let dbModel = {statements=[]}
-    let dbModel = addTable 1 dbModel
+    let randGenerator () = 1
+    let dbModel = addTable randGenerator dbModel
     let sql = getSql dbModel
     printfn "%A" sql
 

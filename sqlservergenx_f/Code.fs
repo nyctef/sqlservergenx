@@ -69,10 +69,12 @@ let getSql x =
 
 /////////////////////////// model generation
 
-// given a seed and a database model, produce a more complicated database model
-type Complicator = int -> DatabaseModel -> DatabaseModel
+type RandomGenerator = unit -> int
 
-let addTable:Complicator = fun seed model ->
+// given a seed and a database model, produce a more complicated database model
+type Complicator = RandomGenerator -> DatabaseModel -> DatabaseModel
+
+let addTable:Complicator = fun rand model ->
     let tp = {name="table"; ttype=PlainTable; columns = [{name="col1"; ctype=NVarChar(Length(5))}]}
     let statement = CreateTable(tp)
     addStatement model statement
