@@ -1,10 +1,14 @@
 ﻿module Tests
 
 open NUnit.Framework
+open Code
 
 [<TestFixture>]
 type TestClass() = 
 
     [<Test>]
-    member this.When2IsAddedTo2Expect4() = 
-        Assert.AreEqual(4, 2+2)
+    member this.scratchPad() = 
+        let dbModel = {statements=[]}
+        let dbModel = addTable 1 dbModel
+        let sql = getSql dbModel
+        printfn "%A" sql
