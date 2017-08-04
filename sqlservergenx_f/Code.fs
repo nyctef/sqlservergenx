@@ -74,6 +74,24 @@ type RandomGenerator = unit -> int
 // given a seed and a database model, produce a more complicated database model
 type Complicator = RandomGenerator -> DatabaseModel -> DatabaseModel
 
+let pickTables statements :Statement list=
+    statements |> List.choose(fun x ->
+        match x with
+        | CreateTable _ -> Some x
+        | _ -> None)
+
+let randMax rand max :int =
+    (rand ()) % max
+
+let randChoose rand (list:'a list) =
+    List.item (randMax rand list.Length) list
+
+let replaceStatement list oldvalue newvalue =
+    list |> List.map (fun x ->
+        match x with
+        | y when y = oldvalue -> newvalue
+        | z -> z)
+
 let findOrCreateTable rand model updateTable =
     // TODO: we want to be able to
     // - find all tables we could add a column to
@@ -84,7 +102,12 @@ let findOrCreateTable rand model updateTable =
 
     // we can probably try writing the massively inefficient version of the above
     // and look into swapping out the datatypes to make it more efficient in the future?
-    model
+    let tables = pickTables model.statements
+    // TODO: do we actually need to handle case of no/too few tables?
+    let table = randChoose rand tables
+    let updatedTable = updateTable table
+    let statements = replaceStatement model.statements table updatedTable
+    {model with statements = statements}
 
 let addTable:Complicator = fun rand model ->
     let tp = {name="table"; ttype=PlainTable; columns = [{name="col1"; ctype=NVarChar(Length(5))}]}
@@ -92,7 +115,7 @@ let addTable:Complicator = fun rand model ->
     addStatement model statement
 
 let addColumn:Complicator = fun rand model ->
-    let updateTable table =
+    let updateTable (CreateTable table) =
         let newColumn = {name="col2"; ctype=NVarChar(Length(5))}
-        {table with columns = newColumn::table.columns}
+        CreateTable({table with columns = newColumn::table.columns})
     findOrCreateTable rand model updateTable

@@ -11,5 +11,6 @@ type TestClass() =
         let dbModel = {statements=[]}
         let randGenerator () = 1
         let dbModel = addTable randGenerator dbModel
+        let dbModel = addColumn randGenerator dbModel
         let sql = getSql dbModel
         printfn "%A" sql
