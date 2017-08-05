@@ -15,6 +15,12 @@ type TestClass() =
         let randGenerator () = rnd.Next()
         let dbModel = addTable randGenerator dbModel
         let dbModel = addColumn randGenerator dbModel
+        let dbModel = addTable randGenerator dbModel
+        let dbModel = addTable randGenerator dbModel
+        let dbModel = addColumn randGenerator dbModel
+        let dbModel = addColumn randGenerator dbModel
+        let dbModel = addTable randGenerator dbModel
+        let dbModel = addColumn randGenerator dbModel
         let sql = getSql dbModel
         dump sql
 
@@ -43,5 +49,6 @@ type TestClass() =
         dump xs
 
         let fscheckRand = Random.StdGen(rnd.Next(), rnd.Next())
+        dump fscheckRand
         
         //dump xs2

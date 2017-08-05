@@ -122,11 +122,13 @@ let charsToString (chars:char list) =
     System.String.Concat(Array.ofList(chars))
 
 let genAlpha rand length =
-    let seed = randToSeed rand
     let gen = Gen.elements alpha
-    let chars = Seq.initInfinite (fun index ->
-        Gen.eval length seed gen) 
-    chars |> Seq.take length |> Seq.toList |> charsToString
+    Seq.initInfinite (fun _ ->
+            Gen.eval length (randToSeed rand) gen
+        )
+        |> Seq.take length
+        |> Seq.toList
+        |> charsToString
 
 let strGen rand =
     Arb.generate<string> |> Gen.eval 10 (randToSeed rand)
@@ -136,7 +138,7 @@ let colGen rand =
     {Column.name="col_" + genAlpha rand 10; ctype=Arb.generate<ColumnType> |> Gen.eval 1 seed}
 
 let addTable:Complicator = fun rand model ->
-    let tp = {name="table"; ttype=PlainTable; columns = [colGen rand]}
+    let tp = {name="table_" + genAlpha rand 10; ttype=PlainTable; columns = [colGen rand]}
     let statement = CreateTable(tp)
     addStatement model statement
 
