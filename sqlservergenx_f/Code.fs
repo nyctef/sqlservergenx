@@ -1,5 +1,7 @@
 ﻿module Code
 
+open FsCheck
+
 type CharLength =
     | Max
     | Length of int
@@ -109,13 +111,37 @@ let findOrCreateTable rand model updateTable =
     let statements = replaceStatement model.statements table updatedTable
     {model with statements = statements}
 
+let alpha = List.append ['a'..'z'] ['A'..'Z']
+
+let alphan = List.append alpha ['0'..'9']
+
+let randToSeed rand =
+    Random.StdGen (rand (), rand ())
+
+let charsToString (chars:char list) =
+    System.String.Concat(Array.ofList(chars))
+
+let genAlpha rand length =
+    let seed = randToSeed rand
+    let gen = Gen.elements alpha
+    let chars = Seq.initInfinite (fun index ->
+        Gen.eval length seed gen) 
+    chars |> Seq.take length |> Seq.toList |> charsToString
+
+let strGen rand =
+    Arb.generate<string> |> Gen.eval 10 (randToSeed rand)
+
+let colGen rand =
+    let seed = randToSeed rand
+    {Column.name="col_" + genAlpha rand 10; ctype=Arb.generate<ColumnType> |> Gen.eval 1 seed}
+
 let addTable:Complicator = fun rand model ->
-    let tp = {name="table"; ttype=PlainTable; columns = [{name="col1"; ctype=NVarChar(Length(5))}]}
+    let tp = {name="table"; ttype=PlainTable; columns = [colGen rand]}
     let statement = CreateTable(tp)
     addStatement model statement
 
 let addColumn:Complicator = fun rand model ->
     let updateTable (CreateTable table) =
-        let newColumn = {name="col2"; ctype=NVarChar(Length(5))}
+        let newColumn = colGen rand
         CreateTable({table with columns = newColumn::table.columns})
     findOrCreateTable rand model updateTable

@@ -11,7 +11,8 @@ type TestClass() =
     [<Test>]
     member this.scratchPad() =
         let dbModel = {statements=[]}
-        let randGenerator () = 1
+        let rnd = System.Random(1)
+        let randGenerator () = rnd.Next()
         let dbModel = addTable randGenerator dbModel
         let dbModel = addColumn randGenerator dbModel
         let sql = getSql dbModel
@@ -29,3 +30,18 @@ type TestClass() =
         let g = Arb.generate<ColumnType>
         dump g
         dump (Gen.sample 1 10 g)
+
+    [<Test>]
+    member this.``random strings``() =
+        let randGenerator () = 2
+        dump (strGen randGenerator)
+
+    [<Test>]
+    member this.``seeded random``() =
+        let rnd = System.Random(1)
+        let xs = List.map (fun x -> rnd.Next()) [1..10]
+        dump xs
+
+        let fscheckRand = Random.StdGen(rnd.Next(), rnd.Next())
+        
+        //dump xs2
