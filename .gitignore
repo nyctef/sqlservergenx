@@ -2,3 +2,9 @@ obj
 bin
 packages
 _ReSharper*
+
+UpgradeLog.htm
+_NCrunch*
+*.user
+.vs
+*.suo
